@@ -1,0 +1,472 @@
+{
+  "info": {
+    "_postman_id": "8f2e3032-11a5-4e0e-bbcf-93d3b76428aa",
+    "name": "Sistema de Gestão de Franquias - API (RU: 5180040)",
+    "description": "Coleção de testes para a API de Gestão de Franquias - Trabalho de Desenvolvimento Back-end (C# / ASP.NET Core).\nAluno: JOÃO PAULO ANDRADE MATHIAS (RU: 5180040)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Autenticação",
+      "item": [
+        {
+          "name": "Login - Administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@franquias.com\",\n  \"senha\": \"Admin@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/Auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["Auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login - Gestor SP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"gestor.sp@franquias.com\",\n  \"senha\": \"Gestor@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/Auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["Auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Obter Dados Usuário Logado (Me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["Auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Unidades Franqueadas",
+      "item": [
+        {
+          "name": "Listar Unidades",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Unidades",
+              "host": ["{{baseUrl}}"],
+              "path": ["Unidades"]
+            }
+          }
+        },
+        {
+          "name": "Cadastrar Nova Unidade",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Unidade Campinas - Cambuí\",\n  \"razaoSocial\": \"Campineira Franquias LTDA\",\n  \"cnpj\": \"67.890.123/0001-45\",\n  \"responsavelNome\": \"Fernanda Guimarães\",\n  \"responsavelEmail\": \"fernanda.cambui@franquias.com\",\n  \"responsavelTelefone\": \"(19) 99123-4567\",\n  \"cidade\": \"Campinas\",\n  \"uf\": \"SP\",\n  \"endereco\": \"Rua Cel. Silva Telles, 450 - Cambuí\",\n  \"percentualRoyalty\": 5.5,\n  \"franqueadoraId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/Unidades",
+              "host": ["{{baseUrl}}"],
+              "path": ["Unidades"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Catálogo e Produtos",
+      "item": [
+        {
+          "name": "Listar Produtos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Produtos",
+              "host": ["{{baseUrl}}"],
+              "path": ["Produtos"]
+            }
+          }
+        },
+        {
+          "name": "Listar Categorias",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["Categorias"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Estoque",
+      "item": [
+        {
+          "name": "Consultar Estoque Unidade 1",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Estoques/unidade/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["Estoques", "unidade", "1"]
+            }
+          }
+        },
+        {
+          "name": "Consultar Estoque Crítico Unidade 1",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Estoques/unidade/1?apenasCriticos=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["Estoques", "unidade", "1"],
+              "query": [
+                {
+                  "key": "apenasCriticos",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Movimentar Estoque (Entrada)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeFranqueadaId\": 1,\n  \"produtoServicoId\": 3,\n  \"tipo\": \"Entrada\",\n  \"quantidade\": 50,\n  \"observacao\": \"Recebimento semanal\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/Estoques/movimentar",
+              "host": ["{{baseUrl}}"],
+              "path": ["Estoques", "movimentar"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Vendas",
+      "item": [
+        {
+          "name": "Registrar Venda com Baixa de Estoque",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeFranqueadaId\": 1,\n  \"observacao\": \"Atendimento Balcão\",\n  \"itens\": [\n    {\n      \"produtoServicoId\": 1,\n      \"quantidade\": 2\n    },\n    {\n      \"produtoServicoId\": 2,\n      \"quantidade\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/Vendas",
+              "host": ["{{baseUrl}}"],
+              "path": ["Vendas"]
+            }
+          }
+        },
+        {
+          "name": "Listar Vendas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Vendas",
+              "host": ["{{baseUrl}}"],
+              "path": ["Vendas"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Royalties e Financeiro",
+      "item": [
+        {
+          "name": "Gerar / Apurar Royalty",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeFranqueadaId\": 1,\n  \"mesReferencia\": 8,\n  \"anoReferencia\": 2026\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/Royalties/gerar",
+              "host": ["{{baseUrl}}"],
+              "path": ["Royalties", "gerar"]
+            }
+          }
+        },
+        {
+          "name": "Resumo de Royalties",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Royalties/resumo?mes=8&ano=2026",
+              "host": ["{{baseUrl}}"],
+              "path": ["Royalties", "resumo"],
+              "query": [
+                {
+                  "key": "mes",
+                  "value": "8"
+                },
+                {
+                  "key": "ano",
+                  "value": "2026"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Chamados",
+      "item": [
+        {
+          "name": "Listar Chamados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Chamados",
+              "host": ["{{baseUrl}}"],
+              "path": ["Chamados"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Relatórios e Indicadores",
+      "item": [
+        {
+          "name": "Faturamento por Unidades",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Relatorios/faturamento-unidades",
+              "host": ["{{baseUrl}}"],
+              "path": ["Relatorios", "faturamento-unidades"]
+            }
+          }
+        },
+        {
+          "name": "Ranking de Unidades",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Relatorios/ranking-unidades",
+              "host": ["{{baseUrl}}"],
+              "path": ["Relatorios", "ranking-unidades"]
+            }
+          }
+        },
+        {
+          "name": "Produtos Mais Vendidos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Relatorios/produtos-mais-vendidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["Relatorios", "produtos-mais-vendidos"]
+            }
+          }
+        },
+        {
+          "name": "Estoque Crítico Geral",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Relatorios/estoque-critico",
+              "host": ["{{baseUrl}}"],
+              "path": ["Relatorios", "estoque-critico"]
+            }
+          }
+        },
+        {
+          "name": "Indicadores Gerais do Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/Relatorios/indicadores-gerais",
+              "host": ["{{baseUrl}}"],
+              "path": ["Relatorios", "indicadores-gerais"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

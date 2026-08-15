@@ -1,0 +1,310 @@
+### ====================================================================
+### SISTEMA DE GESTÃO DE FRANQUIAS - COLEÇÃO DE TESTES HTTP (REST CLIENT)
+### Aluno: JOÃO PAULO ANDRADE MATHIAS | RU: 5180040
+### Repositório: https://github.com/Joaopaulojpam/Trabalho-de-C-
+### ====================================================================
+
+@baseUrl = http://localhost:5000/api
+
+### --------------------------------------------------------------------
+### 1. AUTENTICAÇÃO E LOGIN
+### --------------------------------------------------------------------
+
+# @name loginAdmin
+POST {{baseUrl}}/Auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@franquias.com",
+  "senha": "Admin@123"
+}
+
+### Extração do Token JWT do Admin
+@tokenAdmin = {{loginAdmin.response.body.token}}
+
+### Obter dados do usuário logado (Me)
+GET {{baseUrl}}/Auth/me
+Authorization: Bearer {{tokenAdmin}}
+
+### Login com Gestor da Unidade SP
+# @name loginGestor
+POST {{baseUrl}}/Auth/login
+Content-Type: application/json
+
+{
+  "email": "gestor.sp@franquias.com",
+  "senha": "Gestor@123"
+}
+
+@tokenGestor = {{loginGestor.response.body.token}}
+
+### Login com Operador da Unidade SP
+# @name loginOperador
+POST {{baseUrl}}/Auth/login
+Content-Type: application/json
+
+{
+  "email": "operador.sp@franquias.com",
+  "senha": "Operador@123"
+}
+
+@tokenOperador = {{loginOperador.response.body.token}}
+
+
+### --------------------------------------------------------------------
+### 2. UNIDADES FRANQUEADAS
+### --------------------------------------------------------------------
+
+### Listar todas as unidades
+GET {{baseUrl}}/Unidades
+Authorization: Bearer {{tokenAdmin}}
+
+### Listar apenas unidades ativas
+GET {{baseUrl}}/Unidades?ativo=true
+Authorization: Bearer {{tokenAdmin}}
+
+### Buscar unidade por cidade ou termo de busca
+GET {{baseUrl}}/Unidades?termoBusca=São Paulo
+Authorization: Bearer {{tokenAdmin}}
+
+### Obter unidade por ID (Unidade 1 - São Paulo)
+GET {{baseUrl}}/Unidades/1
+Authorization: Bearer {{tokenAdmin}}
+
+### Cadastrar nova unidade franqueada
+POST {{baseUrl}}/Unidades
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "nome": "Unidade Campinas - Cambuí",
+  "razaoSocial": "Campineira Franquias LTDA",
+  "cnpj": "67.890.123/0001-45",
+  "responsavelNome": "Fernanda Guimarães",
+  "responsavelEmail": "fernanda.cambui@franquias.com",
+  "responsavelTelefone": "(19) 99123-4567",
+  "cidade": "Campinas",
+  "uf": "SP",
+  "endereco": "Rua Cel. Silva Telles, 450 - Cambuí",
+  "percentualRoyalty": 5.5,
+  "franqueadoraId": 1
+}
+
+### Alternar status da unidade (Ativar / Inativar)
+PATCH {{baseUrl}}/Unidades/4/status
+Authorization: Bearer {{tokenAdmin}}
+
+
+### --------------------------------------------------------------------
+### 3. CATEGORIAS, PRODUTOS E SERVIÇOS
+### --------------------------------------------------------------------
+
+### Listar todas as categorias
+GET {{baseUrl}}/Categorias
+Authorization: Bearer {{tokenAdmin}}
+
+### Listar catálogo de produtos e serviços
+GET {{baseUrl}}/Produtos
+Authorization: Bearer {{tokenAdmin}}
+
+### Filtrar produtos da Categoria 1 (Cafés Especiais)
+GET {{baseUrl}}/Produtos?categoriaId=1
+Authorization: Bearer {{tokenAdmin}}
+
+### Cadastrar novo produto no catálogo
+POST {{baseUrl}}/Produtos
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "nome": "Mocha Chocolate Belga",
+  "codigoSku": "BEB-MOC-003",
+  "descricao": "Espresso com calda artesanal de chocolate belga e leite vaporizado",
+  "precoBase": 17.50,
+  "tipo": "Produto",
+  "categoriaId": 1,
+  "fornecedorId": 1
+}
+
+
+### --------------------------------------------------------------------
+### 4. FORNECEDORES HOMOLOGADOS
+### --------------------------------------------------------------------
+
+### Listar fornecedores
+GET {{baseUrl}}/Fornecedores
+Authorization: Bearer {{tokenAdmin}}
+
+
+### --------------------------------------------------------------------
+### 5. ESTOQUE POR UNIDADE
+### --------------------------------------------------------------------
+
+### Consultar estoque completo da Unidade 1 (São Paulo)
+GET {{baseUrl}}/Estoques/unidade/1
+Authorization: Bearer {{tokenAdmin}}
+
+### Consultar itens em ESTOQUE CRÍTICO (abaixo do mínimo) na Unidade 1
+GET {{baseUrl}}/Estoques/unidade/1?apenasCriticos=true
+Authorization: Bearer {{tokenAdmin}}
+
+### Movimentar estoque (Entrada de 50 unidades de Croissant)
+POST {{baseUrl}}/Estoques/movimentar
+Authorization: Bearer {{tokenGestor}}
+Content-Type: application/json
+
+{
+  "unidadeFranqueadaId": 1,
+  "produtoServicoId": 3,
+  "tipo": "Entrada",
+  "quantidade": 50,
+  "observacao": "Recebimento de carga de panificação"
+}
+
+### Auditoria do histórico de movimentações
+GET {{baseUrl}}/Estoques/movimentacoes?unidadeId=1
+Authorization: Bearer {{tokenAdmin}}
+
+
+### --------------------------------------------------------------------
+### 6. VENDAS E ITENS DA VENDA
+### --------------------------------------------------------------------
+
+### Listar histórico de vendas
+GET {{baseUrl}}/Vendas
+Authorization: Bearer {{tokenAdmin}}
+
+### Registrar nova venda na Unidade 1 (baixa automática de estoque)
+POST {{baseUrl}}/Vendas
+Authorization: Bearer {{tokenOperador}}
+Content-Type: application/json
+
+{
+  "unidadeFranqueadaId": 1,
+  "observacao": "Venda presencial balcão",
+  "itens": [
+    {
+      "produtoServicoId": 1,
+      "quantidade": 3
+    },
+    {
+      "produtoServicoId": 2,
+      "quantidade": 2
+    },
+    {
+      "produtoServicoId": 4,
+      "quantidade": 1
+    }
+  ]
+}
+
+### Teste de Regra de Negócio: Tentativa de venda em Unidade INATIVA (deve retornar HTTP 400)
+POST {{baseUrl}}/Vendas
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "unidadeFranqueadaId": 4,
+  "observacao": "Tentativa em unidade inativa",
+  "itens": [
+    {
+      "produtoServicoId": 1,
+      "quantidade": 1
+    }
+  ]
+}
+
+
+### --------------------------------------------------------------------
+### 7. TAXAS, ROYALTIES E FINANCEIRO
+### --------------------------------------------------------------------
+
+### Listar lançamentos de royalties
+GET {{baseUrl}}/Royalties
+Authorization: Bearer {{tokenAdmin}}
+
+### Apurar e gerar royalty da Unidade 1 para o mês atual
+POST {{baseUrl}}/Royalties/gerar
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "unidadeFranqueadaId": 1,
+  "mesReferencia": 8,
+  "anoReferencia": 2026
+}
+
+### Registrar liquidação / pagamento de royalty
+PATCH {{baseUrl}}/Royalties/2/pagar
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "dataPagamento": "2026-08-15T12:00:00Z",
+  "observacao": "Pagamento confirmado via transferência bancária"
+}
+
+### Resumo financeiro consolidado de royalties da rede
+GET {{baseUrl}}/Royalties/resumo?mes=8&ano=2026
+Authorization: Bearer {{tokenAdmin}}
+
+
+### --------------------------------------------------------------------
+### 8. CHAMADOS E SUPORTE À FRANQUIA
+### --------------------------------------------------------------------
+
+### Listar todos os chamados
+GET {{baseUrl}}/Chamados
+Authorization: Bearer {{tokenAdmin}}
+
+### Abrir chamado de suporte pela unidade
+POST {{baseUrl}}/Chamados
+Authorization: Bearer {{tokenGestor}}
+Content-Type: application/json
+
+{
+  "unidadeFranqueadaId": 1,
+  "titulo": "Dúvida sobre nova linha de cafés gelados",
+  "descricao": "Solicitamos material de treinamento da nova linha de Cold Brew.",
+  "categoria": "Treinamento / Produtos",
+  "prioridade": "Media"
+}
+
+### Atualizar status do chamado com solução
+PATCH {{baseUrl}}/Chamados/3/status
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "status": "Concluido",
+  "respostaSolucao": "Problema de comunicação com o SEFAZ resolvido e certificado digital atualizado."
+}
+
+### Contagem de chamados por status
+GET {{baseUrl}}/Chamados/contagem-status
+Authorization: Bearer {{tokenAdmin}}
+
+
+### --------------------------------------------------------------------
+### 9. RELATÓRIOS E INDICADORES GERENCIAIS
+### --------------------------------------------------------------------
+
+### Faturamento e Royalties por Unidade
+GET {{baseUrl}}/Relatorios/faturamento-unidades
+Authorization: Bearer {{tokenAdmin}}
+
+### Ranking de Unidades por Faturamento
+GET {{baseUrl}}/Relatorios/ranking-unidades
+Authorization: Bearer {{tokenAdmin}}
+
+### Produtos Mais Vendidos na Rede
+GET {{baseUrl}}/Relatorios/produtos-mais-vendidos?top=5
+Authorization: Bearer {{tokenAdmin}}
+
+### Relatório Geral de Estoque Crítico
+GET {{baseUrl}}/Relatorios/estoque-critico
+Authorization: Bearer {{tokenAdmin}}
+
+### Indicadores Gerais Consolidados (Dashboard Geral)
+GET {{baseUrl}}/Relatorios/indicadores-gerais
+Authorization: Bearer {{tokenAdmin}}
