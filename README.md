@@ -9,7 +9,7 @@ Trabalho Acadêmico da disciplina de **Desenvolvimento Web Back-end**.
 - **Aluno:** JOÃO PAULO ANDRADE MATHIAS
 - **RU:** 5180040
 - **Professor:** Rodrigo da S. do Nascimento
-- **Repositório GitHub:** [https://github.com/Joaopaulojpam/Trabalho-de-C-](https://github.com/Joaopaulojpam/Trabalho-de-C-)
+- **Repositório GitHub:** [https://github.com/Joaopaulojpam/Trabalho-de-C-](https://github.com/Joaopaulojpam/Trabalho-de-CSharp)
 
 ---
 
